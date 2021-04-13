@@ -1,3 +1,4 @@
+import "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import { StyleSheet, View } from "react-native";
@@ -5,6 +6,9 @@ import * as eva from "@eva-design/eva";
 import { ApplicationProvider, Text } from "@ui-kitten/components";
 import mapping from "./mapping.json";
 import { useFonts } from "expo-font";
+
+import Navigation from "./src";
+import UserContextProvider from "./src/context/UserContext";
 
 const App = () => {
   const [loaded, error] = useFonts({
@@ -22,12 +26,9 @@ const App = () => {
       theme={eva.light}
       customMapping={{ ...eva.mapping, ...mapping }}
     >
-      <View style={styles.container}>
-        <Text style={styles.titleText} category="h1">
-          Do you best and enjoy the process!
-        </Text>
-        <StatusBar style="auto" />
-      </View>
+      <UserContextProvider>
+        <Navigation />
+      </UserContextProvider>
     </ApplicationProvider>
   );
 };
