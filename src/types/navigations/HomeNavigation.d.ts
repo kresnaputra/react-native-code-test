@@ -3,7 +3,7 @@ import {StackNavigationProp} from '@react-navigation/stack';
 
 export type HomeStackParamList = {
   Home: undefined;
-  Detail: undefined;
+  Detail: {id: number};
 };
 
 export interface HomeNavProps<T extends keyof HomeStackParamList> {
