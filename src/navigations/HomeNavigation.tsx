@@ -1,25 +1,25 @@
 import * as React from "react";
-import {
-  createStackNavigator,
-  TransitionPresets,
-} from "@react-navigation/stack";
+import { createSharedElementStackNavigator } from "react-navigation-shared-element";
 import { HomeStackParamList } from "../types/navigations/HomeNavigation";
 import HomeScreen from "../views/Home/HomeScreen";
 import DetailScreen from "../views/Home/DetailScreen";
-import { useTheme } from "@ui-kitten/components";
 
-const Home = createStackNavigator<HomeStackParamList>();
+const Home = createSharedElementStackNavigator<HomeStackParamList>();
 
 function AuthNavigation() {
   return (
     <Home.Navigator
       initialRouteName="Home"
-      screenOptions={{
-        ...TransitionPresets.SlideFromRightIOS,
-      }}
+      
     >
       <Home.Screen name="Home" component={HomeScreen} />
-      <Home.Screen name="Detail" component={DetailScreen} />
+      <Home.Screen
+        name="Detail"
+        component={DetailScreen}
+        sharedElementsConfig={(route) => {
+          return [route.params.id.toString()];
+        }}
+      />
     </Home.Navigator>
   );
 }

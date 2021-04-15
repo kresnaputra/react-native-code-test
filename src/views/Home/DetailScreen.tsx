@@ -1,13 +1,16 @@
 import { Layout, Text } from "@ui-kitten/components";
+import { SharedElement } from "react-navigation-shared-element";
 import LottieView from "lottie-react-native";
 import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
 import { Subscription } from "@unimodules/core";
 import {
   AppState,
   AppStateStatus,
   Image,
+  ImageBackground,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Platform,
@@ -21,6 +24,7 @@ import blogData from "../../data/blogData.json";
 import { IBlogData } from "../../types/json";
 import { HomeNavProps } from "../../types/navigations/HomeNavigation";
 import { ThemeContext } from "../../context/ThemeContext";
+import ImageCache from "../../components/ImageCache";
 
 const data: IBlogData = blogData as IBlogData;
 
@@ -59,15 +63,16 @@ interface INotifcationListener
     Subscription {}
 
 const DetailScreen = ({ route, navigation }: HomeNavProps<"Detail">) => {
-  const themeContext = React.useContext(ThemeContext)
+  const themeContext = React.useContext(ThemeContext);
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerStyle: {backgroundColor: themeContext.theme === 'light' ? 'white' : '#212B47'},
-      headerTintColor: themeContext.theme === 'light' ? 'black' : 'white'
+      headerStyle: {
+        backgroundColor: themeContext.theme === "light" ? "white" : "#212B47",
+      },
+      headerTintColor: themeContext.theme === "light" ? "black" : "white",
     });
-  })
-
+  });
   const notificationListener = (useRef() as unknown) as INotifcationListener;
   const responseListener = (useRef() as unknown) as INotifcationListener;
   const appState = useRef(AppState.currentState);
@@ -150,25 +155,23 @@ const DetailScreen = ({ route, navigation }: HomeNavProps<"Detail">) => {
     setAppStateVisible(appState.current);
   };
 
-  if (!show) {
-    return (
-      <Layout style={{flex: 1}}>
-        <LottieView
-          autoPlay
-          loop
-          source={require("../../../assets/loading.json")}
-        />
-      </Layout>
-    );
-  }
-
   return (
     <ScrollView
       onScrollEndDrag={handleOnScroll}
       style={styles.container}
       scrollEventThrottle={1000}
     >
-      <Image source={{ uri: blog.imageUrl }} style={styles.image} />
+      <SharedElement style={{backgroundColor: themeContext.theme === 'light' ? 'white' : '#212B47'}} id={id.toString()}>
+        <ImageCache
+          cacheKey={`image-id${id}`}
+          // sometime the image show up is take a long time, cause of that I'm using this image asset
+          // source={require('../../../assets/image.jpg')}
+          source={{uri: blog.imageUrl}}
+          style={styles.image}
+          
+        />
+      </SharedElement>
+
       <Space />
       <Layout style={{ paddingHorizontal: 10 }}>
         <Text category="h2">{blog.title.toUpperCase()}</Text>

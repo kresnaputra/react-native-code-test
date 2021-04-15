@@ -1,30 +1,38 @@
-import { Card, Text } from "@ui-kitten/components";
+import { Text } from "@ui-kitten/components";
 import React from "react";
-import { View, StyleSheet, Image } from "react-native";
-
-const Header = ({title}: {title: string}) => (
-  <View>
-    <Text category="h5">{title}</Text>
-  </View>
-);
-
+import { View, StyleSheet, Image, ImageBackground } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 interface ICardCompontent {
-    title: string;
-    image: string;
-    onPress: () => void;
+  title: string;
+  image: string;
+  onPress: () => void;
 }
 
-const CardCompontent = ({title, image, onPress}: ICardCompontent) => {
+const CardCompontent = ({ title, image, onPress }: ICardCompontent) => {
   return (
-    <Card onPress={onPress} header={() => <Header title={title} />}>
-      <Image style={{width: '100%', height: 200}} source={{uri: image}} />
-    </Card>
+    <TouchableOpacity onPress={onPress}>
+      <ImageBackground
+        style={styles.container}
+        borderRadius={20}
+        source={{ uri: image }}
+      >
+        <Text category="h4" style={{ color: "white", textAlign: "center" }}>
+          {title}
+        </Text>
+      </ImageBackground>
+    </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {},
+  container: {
+    width: "100%",
+    height: 350,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
 
 export default CardCompontent;

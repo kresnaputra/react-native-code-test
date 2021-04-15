@@ -1,10 +1,18 @@
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { View, StyleSheet, FlatList } from "react-native";
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  ImageBackground,
+  TouchableOpacity,
+  Image,
+} from "react-native";
 import LottieView from "lottie-react-native";
+import { SharedElement } from "react-navigation-shared-element";
 
 import blogData from "../../data/blogData.json";
-import Card from "../../components/Card";
 import Space from "../../components/Space";
+import ImageChahce from "../../components/ImageCache";
 import { IBlogData } from "../../types/json";
 import { HomeNavProps } from "../../types/navigations/HomeNavigation";
 import { Layout, Text, Toggle } from "@ui-kitten/components";
@@ -18,19 +26,31 @@ const HomeScreen = ({ navigation }: HomeNavProps<"Home">) => {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 15}}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginRight: 15,
+          }}
+        >
           <Toggle
             checked={themeContext.theme === "dark"}
             onChange={themeContext.toggleTheme}
           />
-            
-          <Text style={{marginLeft: 10}}>{themeContext.theme === 'light' ? 'Light' : 'Dark'}</Text>
+
+          <Text style={{ marginLeft: 10 }}>
+            {themeContext.theme === "light" ? "Light" : "Dark"}
+          </Text>
         </View>
       ),
-      headerStyle: {backgroundColor: themeContext.theme === 'light' ? 'white' : '#212B47'},
-      headerTitleStyle: {color: themeContext.theme === 'light' ? 'black' : 'white'}
+      headerStyle: {
+        backgroundColor: themeContext.theme === "light" ? "white" : "#212B47",
+      },
+      headerTitleStyle: {
+        color: themeContext.theme === "light" ? "black" : "white",
+      },
     });
-  })
+  });
 
   const [show, setShow] = useState(false);
 
@@ -54,11 +74,20 @@ const HomeScreen = ({ navigation }: HomeNavProps<"Home">) => {
           data={data.blogs}
           keyExtractor={(_, index) => index.toString()}
           renderItem={({ item, index }) => (
-            <Card
-              title={item.title}
-              image={item.imageUrl}
-              onPress={() => navigationDetail(index)}
-            />
+            <TouchableOpacity onPress={() => navigationDetail(index)}>
+              <SharedElement id={index.toString()}>
+                <ImageChahce
+                  cacheKey={`image-id${index}`}
+                  style={styles.image}
+                  // sometime the image show up is take a long time, cause of that I'm using this image asset
+                  // source={require("../../../assets/image.jpg")}
+                  source={{ uri: item.imageUrl }}
+                />
+              </SharedElement>
+              <Text category="h4" style={styles.text}>
+                {item.title}
+              </Text>
+            </TouchableOpacity>
           )}
           ListHeaderComponent={() => <Space />}
           ItemSeparatorComponent={() => <Space />}
@@ -77,6 +106,19 @@ const HomeScreen = ({ navigation }: HomeNavProps<"Home">) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  image: {
+    width: "100%",
+    height: 350,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  text: {
+    position: "absolute",
+    bottom: 10,
+    left: 10,
+    color: "white",
   },
 });
 
