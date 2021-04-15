@@ -1,9 +1,12 @@
 import { Text } from "@ui-kitten/components";
-import Constants from 'expo-constants';
+import LottieView from "lottie-react-native";
+import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
 import React, { useEffect, useRef, useState } from "react";
 import { Subscription } from "@unimodules/core";
 import {
+  AppState,
+  AppStateStatus,
   Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -26,27 +29,48 @@ Notifications.setNotificationHandler({
     shouldPlaySound: false,
     shouldSetBadge: false,
   }),
+  handleSuccess: (notificationIdentifier) => {
+    Notifications.dismissNotificationAsync(notificationIdentifier);
+  },
 });
 
 async function schedulePushNotification() {
-  console.log("lalaland");
-  await Notifications.scheduleNotificationAsync({
+  const identifier = await Notifications.scheduleNotificationAsync({
     content: {
-      title: "You've got mail! 📬",
-      body: "Here is the notification body",
-      data: { data: "goes here" },
+      title: "Hey continue read this article",
     },
-    trigger: { seconds: 2 },
+    trigger: { hour: 3, repeats: true },
   });
+  return identifier;
 }
 
-interface INotifcationListener extends React.MutableRefObject<any>, Subscription {}
+async function scheduleCancel(identifier?: string) {
+  if (identifier) {
+    await Notifications.cancelScheduledNotificationAsync(identifier);
+    return;
+  }
 
-const DetailScreen = ({ route }: HomeNavProps<"Detail">) => {
+  await Notifications.cancelAllScheduledNotificationsAsync();
+}
+
+interface INotifcationListener
+  extends React.MutableRefObject<any>,
+    Subscription {}
+
+const DetailScreen = ({ route, navigation }: HomeNavProps<"Detail">) => {
+  const notificationListener = (useRef() as unknown) as INotifcationListener;
+  const responseListener = (useRef() as unknown) as INotifcationListener;
+  const appState = useRef(AppState.currentState);
+
+  const [identifier, setIdentifier] = useState('');
   const [isSeventy, setIsSeventy] = useState(false);
-  const [notification, setNotification] = useState(false);
-  const notificationListener = useRef() as unknown as INotifcationListener;
-  const responseListener = useRef() as unknown as INotifcationListener;
+  const [show, setShow] = useState(false);
+  const [done, setDone] = useState(false);
+  const [appStateVisible, setAppStateVisible] = useState(appState.current);
+  const [
+    notification,
+    setNotification,
+  ] = useState<Notifications.Notification>();
 
   const { params } = route;
   const { id } = params;
@@ -55,7 +79,9 @@ const DetailScreen = ({ route }: HomeNavProps<"Detail">) => {
 
   const date = new Date(blog.datePublished);
 
-  const handleOnScroll = async(native: NativeSyntheticEvent<NativeScrollEvent>) => {
+  const handleOnScroll = async (
+    native: NativeSyntheticEvent<NativeScrollEvent>
+  ) => {
     const { nativeEvent } = native;
     const getSeventyPersentRead = nativeEvent.contentSize.height * 0.7;
 
@@ -64,32 +90,71 @@ const DetailScreen = ({ route }: HomeNavProps<"Detail">) => {
       getSeventyPersentRead
     ) {
       if (!isSeventy) {
-        await schedulePushNotification();
         setIsSeventy(true);
+        const identifier = await schedulePushNotification();
+        setIdentifier(identifier);
       }
+    }
+    if (
+      nativeEvent.layoutMeasurement.height + nativeEvent.contentOffset.y ===
+      nativeEvent.contentSize.height
+    ) {
+      setDone(true);
+      scheduleCancel();
     }
   };
 
   useEffect(() => {
-    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-      setNotification(!notification);
-    });
+    const timer = setTimeout(() => setShow(true), 5000);
 
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log(response);
-    });
+    AppState.addEventListener("change", _handleAppStateChange);
+
+    notificationListener.current = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        setNotification(notification);
+      }
+    );
+
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        navigation.navigate('Detail', {id});
+      }
+    );
 
     return () => {
       Notifications.removeNotificationSubscription(notificationListener);
       Notifications.removeNotificationSubscription(responseListener);
+      clearTimeout(timer);
     };
   }, []);
 
+  const _handleAppStateChange = (nextAppState: AppStateStatus) => {
+    if (appState.current.match(/active/) && nextAppState === "background") {
+      Notifications.getPresentedNotificationsAsync();
+    }
+    if (nextAppState === "active") {
+      scheduleCancel(identifier);
+    }
+
+    appState.current = nextAppState;
+    setAppStateVisible(appState.current);
+  };
+
+  if (!show) {
+    return (
+      <LottieView
+        autoPlay
+        loop
+        source={require("../../../assets/loading.json")}
+      />
+    )
+  }
+
   return (
     <ScrollView
-      onScroll={handleOnScroll}
+      onScrollEndDrag={handleOnScroll}
       style={styles.container}
-      scrollEventThrottle={400}
+      scrollEventThrottle={1000}
     >
       <Image source={{ uri: blog.imageUrl }} style={styles.image} />
       <Space />
