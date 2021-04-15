@@ -1,24 +1,18 @@
 import { Layout, Text } from "@ui-kitten/components";
 import { SharedElement } from "react-navigation-shared-element";
-import LottieView from "lottie-react-native";
-import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Ionicons } from "@expo/vector-icons";
 import { Subscription } from "@unimodules/core";
 import {
   AppState,
   AppStateStatus,
-  Image,
-  ImageBackground,
   NativeScrollEvent,
   NativeSyntheticEvent,
-  Platform,
   ScrollView,
   StyleSheet,
-  View,
 } from "react-native";
 import Space from "../../components/Space";
+import days from 'dayjs'
 
 import blogData from "../../data/blogData.json";
 import { IBlogData } from "../../types/json";
@@ -177,7 +171,7 @@ const DetailScreen = ({ route, navigation }: HomeNavProps<"Detail">) => {
         <Text category="h2">{blog.title.toUpperCase()}</Text>
         <Text category="label">Author: {blog.author}</Text>
         <Text category="label">
-          Date: {date.getFullYear()}-{date.getMonth()}-{date.getDate()}
+          Date: {days(`${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`).format('YYYY MMMM D')}
         </Text>
         <Text category="label">Views: {blog.views}</Text>
         <Space />
