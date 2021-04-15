@@ -10,7 +10,7 @@ export default function Navigation() {
 
   return (
     <NavigationContainer>
-      {state.uid.length === 0 ? <HomeNavigation /> : <AuthNavigation />}
+      {state.uid.length > 0 ? <HomeNavigation /> : <AuthNavigation />}
     </NavigationContainer>
   );
 }

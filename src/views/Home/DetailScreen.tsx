@@ -1,8 +1,8 @@
-import { Text } from "@ui-kitten/components";
+import { Layout, Text } from "@ui-kitten/components";
 import LottieView from "lottie-react-native";
 import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Subscription } from "@unimodules/core";
 import {
   AppState,
@@ -20,6 +20,7 @@ import Space from "../../components/Space";
 import blogData from "../../data/blogData.json";
 import { IBlogData } from "../../types/json";
 import { HomeNavProps } from "../../types/navigations/HomeNavigation";
+import { ThemeContext } from "../../context/ThemeContext";
 
 const data: IBlogData = blogData as IBlogData;
 
@@ -58,11 +59,20 @@ interface INotifcationListener
     Subscription {}
 
 const DetailScreen = ({ route, navigation }: HomeNavProps<"Detail">) => {
+  const themeContext = React.useContext(ThemeContext)
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerStyle: {backgroundColor: themeContext.theme === 'light' ? 'white' : '#212B47'},
+      headerTintColor: themeContext.theme === 'light' ? 'black' : 'white'
+    });
+  })
+
   const notificationListener = (useRef() as unknown) as INotifcationListener;
   const responseListener = (useRef() as unknown) as INotifcationListener;
   const appState = useRef(AppState.currentState);
 
-  const [identifier, setIdentifier] = useState('');
+  const [identifier, setIdentifier] = useState("");
   const [isSeventy, setIsSeventy] = useState(false);
   const [show, setShow] = useState(false);
   const [done, setDone] = useState(false);
@@ -117,7 +127,7 @@ const DetailScreen = ({ route, navigation }: HomeNavProps<"Detail">) => {
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(
       (response) => {
-        navigation.navigate('Detail', {id});
+        navigation.navigate("Detail", { id });
       }
     );
 
@@ -142,12 +152,14 @@ const DetailScreen = ({ route, navigation }: HomeNavProps<"Detail">) => {
 
   if (!show) {
     return (
-      <LottieView
-        autoPlay
-        loop
-        source={require("../../../assets/loading.json")}
-      />
-    )
+      <Layout style={{flex: 1}}>
+        <LottieView
+          autoPlay
+          loop
+          source={require("../../../assets/loading.json")}
+        />
+      </Layout>
+    );
   }
 
   return (
@@ -158,7 +170,7 @@ const DetailScreen = ({ route, navigation }: HomeNavProps<"Detail">) => {
     >
       <Image source={{ uri: blog.imageUrl }} style={styles.image} />
       <Space />
-      <View style={{ paddingHorizontal: 10 }}>
+      <Layout style={{ paddingHorizontal: 10 }}>
         <Text category="h2">{blog.title.toUpperCase()}</Text>
         <Text category="label">Author: {blog.author}</Text>
         <Text category="label">
@@ -167,7 +179,7 @@ const DetailScreen = ({ route, navigation }: HomeNavProps<"Detail">) => {
         <Text category="label">Views: {blog.views}</Text>
         <Space />
         <Text>{blog.content}</Text>
-      </View>
+      </Layout>
       <Space />
     </ScrollView>
   );

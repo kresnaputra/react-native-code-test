@@ -1,13 +1,14 @@
 import { Alert, StyleSheet, View, Text } from "react-native";
 import * as React from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Button, Input, Spinner } from "@ui-kitten/components";
+import { Button, Input, Layout, Spinner } from "@ui-kitten/components";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
 import Space from "../../components/Space";
 import firebaseConfig from "../../config/firebase";
 import { AuthNavProps } from "../../types/navigations/AuthNavigation";
+import { ThemeContext } from "../../context/ThemeContext";
 
 type FormData = {
   email: string;
@@ -28,6 +29,16 @@ const schema = yup.object().shape({
 });
 
 const RegisterScreen = ({navigation}: AuthNavProps<"Register">) => {
+  const themeContext = React.useContext(ThemeContext);
+
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerStyle: {backgroundColor: themeContext.theme === 'light' ? 'white' : '#212B47'},
+      headerTitleStyle: {color: themeContext.theme === 'light' ? 'black' : 'white'}
+    });
+  })
+
+
   const [loading, setLoading] = React.useState(false);
 
   const {
@@ -54,7 +65,7 @@ const RegisterScreen = ({navigation}: AuthNavProps<"Register">) => {
   };
 
   return (
-    <View style={styles.container}>
+    <Layout style={styles.container}>
       <Space />
       <Controller
         control={control}
@@ -138,7 +149,7 @@ const RegisterScreen = ({navigation}: AuthNavProps<"Register">) => {
       ) : (
         <Button onPress={handleSubmit(onSubmit)}>Register</Button>
       )}
-    </View>
+    </Layout>
   );
 };
 
@@ -152,7 +163,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: "white",
     paddingHorizontal: 15,
   },
   textError: {

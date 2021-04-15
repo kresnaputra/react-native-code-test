@@ -1,7 +1,7 @@
-import { Alert, StyleSheet, View, Text } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import * as React from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Button, Input, Spinner } from "@ui-kitten/components";
+import { Button, Input, Layout, Spinner, Text } from "@ui-kitten/components";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
@@ -9,6 +9,7 @@ import Space from "../../components/Space";
 import firebaseConfig from "../../config/firebase";
 import { AuthNavProps } from "../../types/navigations/AuthNavigation";
 import { UserContext } from "../../context/UserContext";
+import { ThemeContext } from "../../context/ThemeContext";
 
 type FormData = {
   email: string;
@@ -26,6 +27,15 @@ const schema = yup.object().shape({
 interface ILoginScreen extends AuthNavProps<'Login'> {}
 
 const LoginScreen = ({navigation}: ILoginScreen) => {
+  const themeContext = React.useContext(ThemeContext);
+
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerStyle: {backgroundColor: themeContext.theme === 'light' ? 'white' : '#212B47'},
+      headerTitleStyle: {color: themeContext.theme === 'light' ? 'black' : 'white'}
+    });
+  })
+
   const {dispatch } = React.useContext(UserContext);
 
   const [loading, setLoading] = React.useState(false);
@@ -58,7 +68,7 @@ const LoginScreen = ({navigation}: ILoginScreen) => {
   }
 
   return (
-    <View style={styles.container}>
+    <Layout style={styles.container}>    
       <Space />
       <Controller
         control={control}
@@ -111,7 +121,7 @@ const LoginScreen = ({navigation}: ILoginScreen) => {
           Click here to <Text onPress={signUp} style={styles.signUpText}>Sign Up</Text>
         </Text>
       </View>
-    </View>
+    </Layout>
   );
 };
 
@@ -120,12 +130,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   signUpText: {
-    color: "blue",
+    color: "#5771BD",
     fontWeight: "bold",
   },
   container: {
     flex: 1,
-    backgroundColor: "white",
     paddingHorizontal: 15,
   },
   textError: {

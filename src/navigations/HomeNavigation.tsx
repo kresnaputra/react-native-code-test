@@ -6,6 +6,7 @@ import {
 import { HomeStackParamList } from "../types/navigations/HomeNavigation";
 import HomeScreen from "../views/Home/HomeScreen";
 import DetailScreen from "../views/Home/DetailScreen";
+import { useTheme } from "@ui-kitten/components";
 
 const Home = createStackNavigator<HomeStackParamList>();
 

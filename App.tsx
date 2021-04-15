@@ -9,8 +9,16 @@ import { useFonts } from "expo-font";
 
 import Navigation from "./src";
 import UserContextProvider from "./src/context/UserContext";
+import { ThemeContext } from "./src/context/ThemeContext";
 
 const App = () => {
+  const [theme, setTheme] = React.useState<"light" | "dark">("light");
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "light" ? "dark" : "light";
+    setTheme(nextTheme);
+  };
+
   const [loaded, error] = useFonts({
     Roboto: require("./assets/fonts/Roboto/Roboto.ttf"),
     "Roboto-Bold": require("./assets/fonts/Roboto/Roboto-Bold.ttf"),
@@ -20,16 +28,19 @@ const App = () => {
     return null;
   }
 
+
   return (
-    <ApplicationProvider
-      {...eva}
-      theme={eva.light}
-      customMapping={{ ...eva.mapping, ...mapping }}
-    >
-      <UserContextProvider>
-        <Navigation />
-      </UserContextProvider>
-    </ApplicationProvider>
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      <ApplicationProvider
+        {...eva}
+        theme={eva[theme]}
+        customMapping={{ ...eva.mapping, ...mapping }}
+      >
+        <UserContextProvider>
+          <Navigation />
+        </UserContextProvider>
+      </ApplicationProvider>
+    </ThemeContext.Provider>
   );
 };
 
